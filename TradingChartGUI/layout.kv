@@ -1,0 +1,193 @@
+#: import NoTransition kivy.uix.screenmanager.NoTransition
+<ScreenManager>:
+    transition: NoTransition()
+
+ScreenManager:
+    PassScreen:
+    MainScreen:
+
+<PassScreen>:
+    name: 'pass'
+    MDTextButton:
+        text: 'LOGIN'
+        pos_hint: {'center_x':0.5,'center_y':0.5}
+        font_size: 32
+        on_press:
+            ans = app.pwd_present()
+            if ans == True:  root.manager.current = 'main'
+            elif ans == False: root.show_dialogb()
+
+<MainScreen>:
+    #md_bg_color: app.theme_cls.primary_color
+    name: 'main'
+    MDGridLayout:
+        rows: 2
+
+        MDGridLayout:
+            cols: 4
+            adaptive_height: True
+
+            MDTextField:
+                id: symbol_field
+                padding: 20
+                hint_text: " Search by STOCK KEY"
+                pos_hint: {"x": 0}
+                on_text_validate: root.Pressed()
+                required: True
+                helper_text_mode: "on_error"
+                helper_text: ""
+
+            MDIconButton:
+                halign: "center"
+                icon: "arrow-right-thick"
+                pos_hint: {"x": .90}
+                on_press: root.Pressed()
+                size_hint: None, None
+                size: dp(20), dp(20)
+
+            MDIconButton:
+                halign: 'center'
+                icon: 'cog'
+                pos_hint: {'x': .95}
+                on_press: root.settings()
+
+        MDGridLayout:
+            cols:1
+            #md_bg_color: app.theme_cls.primary_color
+            Table:
+                #md_bg_color: app.theme_cls.primary_color
+
+<BoxInDialog>
+    adaptive_height: True
+
+    MDGridLayout:
+        rows: 2
+        adaptive_height: True
+
+        MDGridLayout:
+            cols: 3
+            MDTextField:
+                id: passww
+                hint_text: "Password"
+                pos_hint: {"x": .90}
+                password: True
+                required: True
+            MDIconButton:
+                id: eye_but
+                icon: 'eye-off'
+                pos_hint: {"x": .05}
+                on_press: root.eye_but_press()
+            MDIconButton:
+                id: go_but
+                icon: 'arrow-right-bold'
+                pos_hint: {"x": .05}
+                on_press:
+                    password = passww.text
+                    state_of_connection = root.check_connect(password)
+                    if state_of_connection == True: root.go_but_press(password, passwd_checkbox.state)
+                    else: passww.helper_text = 'Wrong Password: Try Again'
+
+        MDGridLayout:
+            cols:2
+            MDCheckbox:
+                id: passwd_checkbox
+                size_hint_x: 0.07
+                active: False
+            MDLabel:
+                text: "Remember Me"
+                font_size: 15
+                pos_hint: {"x": .95}
+
+<Settings_Dialog>:
+    rows: 2
+    adaptive_height: True
+    padding: 10
+    spacing: 10
+    #md_bg_color: app.theme_cls.primary_color
+
+    MDGridLayout:
+        rows: 2
+        adaptive_height: True
+
+        MDLabel:
+            markup: True
+            text: '[b]App Settings[/b]'
+            font_size: 15
+
+        MDGridLayout:
+            cols: 2
+            rows: 2
+            spacing: 5
+
+            MDLabel:
+                text: 'App Theme'
+                font_size: 12
+                adaptive_height: True
+            ToggleButton:
+                id: darklight
+                markup: True
+                state: 'normal' if root.dict_data()['mode'] == 'Light' else 'down'
+                text: {'normal':'[b]LIGHT[/b]', 'down':'[b]DARK[/b]'}[self.state]
+                color: {'normal':[0,0,0], 'down':[1,1,1]}[self.state]
+                background_color: {'normal':[1,1,1,1], 'down':[0,0,0,1]}[self.state]
+                font_size: self.height * .6
+                size_hint: None, None
+                size: "70dp", "22dp"
+                pos_hint: {'y': 1}
+                on_press: root.save_mode(self.state)
+            MDLabel:
+                text: 'App Accent'
+                font_size: 12
+                adaptive_height: True
+            MDDropDownItem:
+                id: accent_c
+                text: root.dict_data()['accent']
+                font_size: 12
+                pos_hint: {'y': 0}
+                on_release: root.accent_color.open()
+                adaptive_height: True
+                
+    MDGridLayout:
+        rows: 2
+        adaptive_height: True
+        
+        MDLabel:
+            markup: True
+            text: '[b]Plot Settings[/b]'
+            font_size: 15
+            adaptive_height: True
+
+        MDGridLayout:
+            rows: 3
+            cols: 2
+            adaptive_height: True
+            spacing: 5
+
+            MDLabel:
+                text: "Plot Type"
+                font_size: 12
+                adaptive_height: True
+            MDDropDownItem:
+                id: g_type
+                font_size: 12
+                text: root.dict_data()['plot_type']
+                on_release: root.plot_type.open()
+                adaptive_height: True
+            MDLabel:
+                text: 'Plot Color'
+                font_size: 12
+            MDDropDownItem:
+                id: g_color
+                font_size: 12
+                text: root.dict_data()['plot_color']
+                on_release: root.plot_color.open()
+            MDLabel:
+                text: 'Volume'
+                font_size: 12
+                adaptive_height: True
+            MDCheckbox:
+                id: vol_check
+                size_hint: None, None
+                size: "20dp", "20dp"
+                active: True if root.dict_data()['volume'] == 'True' else False
+                on_active: root.save_vol(self.active)
